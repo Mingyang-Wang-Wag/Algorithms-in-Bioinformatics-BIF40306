@@ -9,9 +9,11 @@ Description:
     calculated as the percentage of G and C bases in the sequence.
 
 Usage:
-    python3 2025exam.py <sequence_filename.txt>
+    python <script.py> <sequence_filename.txt>
 
 Arguments:
+    script.py: str
+        Name of the script
     sequence_filename.txt: str
         Name of the input txt file containing a DNA sequence.
 
