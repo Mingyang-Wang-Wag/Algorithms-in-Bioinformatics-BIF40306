@@ -75,9 +75,10 @@ class DNA:
             exit()
         else:
             for letter in self.seq:
-                if letter == 'G' or letter == 'g' or letter == 'C' or letter == 'c':
-                # equals to if (letter == 'G') or ('g') or ('C') or ('c'):
-                # and 'g' will be treated as a non-empty string, which will be always True
+                if (letter == 'G' or letter == 'g' or letter == 'C' or
+                        letter == 'c'):
+    # equals to if (letter == 'G') or ('g') or ('C') or ('c'):
+    # and 'g' will be treated as a non-empty string, which will be always True
                     count += 1
 
         self.gc_content = (count / len(self.seq)) * 100
