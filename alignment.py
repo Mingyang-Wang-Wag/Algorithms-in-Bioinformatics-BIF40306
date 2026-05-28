@@ -152,7 +152,7 @@ def fill_matrix(seq1, seq2, gap_penalty, end_gap_penalty):
     filled_matrix = initial_matrix_creation(seq1, seq2, end_gap_penalty)
 
     rows = len(filled_matrix)
-    cols = len(filled_matrix[0])
+    cols = len(filled_matrix[0]) #this part already overlapped with the fill function
 
     for i in range(1, rows):
         for j in range(1, cols):
