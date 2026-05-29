@@ -66,8 +66,283 @@ def reduced_alignment_maker(seq_ls, match_state):
 
     return redu_seq_ls
 
-def transitions_count():
+def transitions_count(seq_ls, match_state):
+    """
+    input, the sequence and the match state, reduce sequence
+
+    output, the state count
+    emission
+    """
+    transition_counts = []
+    emission_counts = {}
+    for seq in seq_ls:
+        match_count = 0
+        for i, state in enumerate(match_state):
+            #three section is similar
+            if i == 0: #section 1, the beginning and first state
+                if seq[i] == '-' and state == False: #no emission in this state
+                    trans_state = ('Begin', f'')
+
+                    found = False #this is the flag
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+
+                elif seq[i] != '-' and state == False: #Insertion
+                    trans_state = ('Begin', f'I{match_count}')
+                    #emission adding
+                    residue = seq[i]
+                    current_state = trans_state[1]
+                    if (current_state, residue) not in emission_counts:
+                        emission_counts[(current_state, residue)] = 1
+                    else:
+                        emission_counts[(current_state, residue)] += 1
+                    #transition adding
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                elif seq[i] == '-' and state == True: #Deletion #no emission
+                    match_count += 1
+                    trans_state = ('Begin', f'D{match_count}')
+
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                elif seq[i] != '-' and state == True:
+                    match_count += 1
+                    trans_state = ('Begin', f'M{match_count}')
+                    # emission adding
+                    residue = seq[i]
+                    current_state = trans_state[1]
+                    if (current_state, residue) not in emission_counts:
+                        emission_counts[(current_state, residue)] = 1
+                    else:
+                        emission_counts[(current_state, residue)] += 1
+                    # transition adding
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+            elif i < len(match_state) - 1:  # section 2, the state in between
+                if seq[i] == '-' and state == False: #no emission
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'')
+
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                elif seq[i] != '-' and state == False:
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'I{match_count}')
+                    # emission adding
+                    residue = seq[i]
+                    current_state = trans_state[1]
+                    if (current_state, residue) not in emission_counts:
+                        emission_counts[(current_state, residue)] = 1
+                    else:
+                        emission_counts[(current_state, residue)] += 1
+                    # transition adding
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                elif seq[i] == '-' and state == True: #no emission
+                    match_count += 1
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'D{match_count}')
+
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                elif seq[i] != '-' and state == True:
+                    match_count += 1
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'M{match_count}')
+                    # emission adding
+                    residue = seq[i]
+                    current_state = trans_state[1]
+                    if (current_state, residue) not in emission_counts:
+                        emission_counts[(current_state, residue)] = 1
+                    else:
+                        emission_counts[(current_state, residue)] += 1
+                    # transition adding
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+            else: #section 3, the last state and end state
+                if seq[i] == '-' and state == False:
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'')
+                    end_state = (f'{trans_state[1]}', f'End')
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                    for item in transition_counts:
+                        if item[0] == end_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([end_state, 1])
+
+                elif seq[i] != '-' and state == False:
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'I{match_count}')
+                    end_state = (f'{trans_state[1]}', f'End')
+                    # emission adding
+                    residue = seq[i]
+                    current_state = trans_state[1]
+                    if (current_state, residue) not in emission_counts:
+                        emission_counts[(current_state, residue)] = 1
+                    else:
+                        emission_counts[(current_state, residue)] += 1
+                    # transition adding
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                    for item in transition_counts:
+                        if item[0] == end_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([end_state, 1])
+
+                elif seq[i] == '-' and state == True:
+                    match_count += 1
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'D{match_count}')
+                    end_state = (f'{trans_state[1]}', f'End')
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                    for item in transition_counts:
+                        if item[0] == end_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([end_state, 1])
+
+                elif seq[i] != '-' and state == True:
+                    match_count += 1
+                    pre_state = transition_counts[i - 1][0][1]
+                    trans_state = (f'{pre_state}', f'M{match_count}')
+                    end_state = (f'{trans_state[1]}', f'End')
+                    # emission adding
+                    residue = seq[i]
+                    current_state = trans_state[1]
+                    if (current_state, residue) not in emission_counts:
+                        emission_counts[(current_state, residue)] = 1
+                    else:
+                        emission_counts[(current_state, residue)] += 1
+                    # transition adding
+                    found = False
+                    for item in transition_counts:
+                        if item[0] == trans_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([trans_state, 1])
+
+                    for item in transition_counts:
+                        if item[0] == end_state:
+                            item[1] += 1
+                            found = True
+                            break
+
+                    if found == False:
+                        transition_counts.append([end_state, 1])
+
+    return transition_counts, emission_counts
+
+def trans_count_normalize(transition_counts):
     pass
+
+
+
+
+
+
 
 # Background amino acid probabilities
 pa = { 'A':0.074, 'C':0.025, 'D':0.054, 'E':0.054, 'F':0.047, 'G':0.074,
@@ -135,14 +410,21 @@ def emission_counts(alignment,is_match_state):
     return em_dic
 
 def main():
-    infile = 'develop.fasta'
-    seq_ls = fasta_reader(infile)
-    match_state = match_state_checker(seq_ls)
-    print(match_state)
-    redu_seq_ls = reduced_alignment_maker(seq_ls, match_state)
-    print(redu_seq_ls)
+    """
     #the main should produce all the results for the report
 
+
+    """
+    infile = 'develop.fasta'
+    seq_ls = fasta_reader(infile)
+    #print(seq_ls) #['-VFA-A-AGY', '-V---ANVDV', '-VE----VAH', '-VKG-----D', '-VYS--TYES', '-FNA--NIPH', 'AIAGADNGAV']
+    match_state = match_state_checker(seq_ls)
+    #print(match_state) #[False, True, True, True, False, False, True, True, True, True]
+    redu_seq_ls = reduced_alignment_maker(seq_ls, match_state)
+    #print(redu_seq_ls) #['VFA-AGY', 'V--NVDV', 'VE--VAH', 'VKG---D', 'VYSTYES', 'FNANIPH', 'IAGNGAV']
+    transition_counts, emission_counts = transitions_count(seq_ls, match_state)
+    print(transition_counts)
+    print(emission_counts)
 if __name__ == "__main__":
     main()
     # implement main code here
