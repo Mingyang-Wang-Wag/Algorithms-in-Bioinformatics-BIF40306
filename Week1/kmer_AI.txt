@@ -1,0 +1,94 @@
+Mingyang Wang
+1067192
+Tool: Chatgpt, it is handy to generate coding script in small amount.
+
+---------------------
+The main differences between my kmer script and kmer script made by AI are
+1. The way to generate k-mer library
+
+I used four layer for loops of iterating the 'ATCG'
+
+AI use a more general way, that can generate k-mers for any value of k
+
+alphabet = 'ACGT'
+    kmers = []
+
+    for item in product(alphabet, repeat=k):
+        kmer = ''.join(item)
+        kmers.append(kmer)
+
+2. Counting
+
+AI used
+for i in range(len(seq) - k + 1):
+    current_kmer = seq[i:i + k]
+    counts[current_kmer] += 1
+
+it only loop the valid position
+
+
+My way:
+for i in range(len(dna_seq)):
+    if i+4 <= len(dna_seq):
+        kmer = dna_seq[i:i+4]
+
+I looped all, and filtered the invalid part.
+
+3. Dictionary storage
+
+AI stores all kmer first and then count
+counts = {}
+
+for kmer in kmers:
+    counts[kmer] = 0
+
+counts[current_kmer] += 1
+
+
+I only stored k-mer that actually appear, and then check which is not stored
+if kmer not in kmer_dict:
+    kmer_dict[kmer] = 1
+else:
+    kmer_dict[kmer] += 1
+
+if kmer in kmer_dict:
+    freq = kmer_dict[kmer]
+else:
+    freq = 0
+
+
+4. Difference in output formatting
+
+AI:
+output = []
+
+for kmer in kmers:
+    output.append(str(counts[kmer]))
+
+print(' '.join(output))
+
+My way:
+for value in freq_ls:
+    print(value, end=' ')
+
+AI way is neater, but my way is easier to read for python beginner.
+
+5.Name of function
+
+AI:
+parse_fasta()
+generate_kmers()
+count_kmers()
+
+My:
+reader()
+parser()
+output()
+
+AI version is better, it is more informative
+-------------------------
+
+I validate the code by calling it  python kmer_AI.py Rosalind_6431.txt in the
+terminal, it worked well.
+
+

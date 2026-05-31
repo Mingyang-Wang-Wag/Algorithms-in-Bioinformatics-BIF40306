@@ -9,7 +9,7 @@ Usage:python test_hamm.py
 """
 
 import unittest
-import hamm
+from Week1 import hamm
 
 
 class TestHammingDistance(unittest.TestCase): #inherrit from class unittest

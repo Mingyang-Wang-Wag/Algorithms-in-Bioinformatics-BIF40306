@@ -1,0 +1,363 @@
+Mingyang Wang
+1067192
+
+
+1. If you used AI, what tool did you use and how?
+
+I used ChatGPT to help me understand the trie construction logic and to
+compare possible Python implementations.
+I used it mainly as a learning assistant:
+to explain how shared prefixes are reused in a trie,
+how node numbers are assigned,
+and how the adjacency-list output should be formatted.
+I then checked the code myself and made sure
+I understood each function before using it.
+
+----------------------
+2. How did you validate that the code does what it is supposed to do?
+
+I validated the code by testing it on the sample dataset:
+
+ATAGA
+ATC
+GAT
+
+The expected output is:
+
+1 2 A
+2 3 T
+3 4 A
+4 5 G
+5 6 A
+3 7 C
+1 8 G
+8 9 A
+9 10 T
+
+I compared my program output with the sample output and
+checked that the same trie structure was produced.
+I also manually traced the insertion of each pattern: ATAGA creates the first path,
+ATC reuses the existing A and T edges and only adds C,
+and GAT creates a separate branch from the root.
+
+
+3. Describe the data structure that is used for the trie.
+
+The trie is stored as a nested dictionary-like structure.
+Each node is represented by an integer ID, starting with root node 1.
+The value for each node is another dictionary containing its outgoing edges.
+
+For example:
+
+trie = {
+    1: {'A': 2, 'G': 8},
+    2: {'T': 3},
+    3: {'A': 4, 'C': 7},
+    4: {'G': 5},
+    5: {'A': 6},
+    6: {},
+    7: {},
+    8: {'A': 9},
+    9: {'T': 10},
+    10: {}
+}
+
+This means that from node 1, there is an edge labeled A to node 2,
+and an edge labeled G to node 8.
+The adjacency list is then produced by printing each parent node, child node,
+and edge label when a new edge is created
+
+
+This problem is asking you to build a trie from several DNA strings.
+
+A trie is like a tree where shared prefixes are stored only once.
+
+1. Input
+ATAGA
+ATC
+GAT
+
+These are the patterns.
+
+You need to insert them into a tree one by one.
+
+The root node is always:
+
+1
+2. Insert first pattern: ATAGA
+
+Start at root 1.
+
+ATAGA
+
+There is no edge A from node 1, so create one:
+
+1 --A--> 2
+
+Then T:
+
+2 --T--> 3
+
+Then A:
+
+3 --A--> 4
+
+Then G:
+
+4 --G--> 5
+
+Then A:
+
+5 --A--> 6
+
+So far the adjacency list is:
+
+1 2 A
+2 3 T
+3 4 A
+4 5 G
+5 6 A
+
+This path spells:
+
+A T A G A
+
+So it represents ATAGA.
+
+3. Insert second pattern: ATC
+
+Now insert:
+
+ATC
+
+Start again at root 1.
+
+First letter is A.
+
+But this edge already exists:
+
+1 --A--> 2
+
+So do not create a new node.
+
+Next letter is T.
+
+This edge also already exists:
+
+2 --T--> 3
+
+So again, do not create a new node.
+
+Next letter is C.
+
+From node 3, there is currently an A edge:
+
+3 --A--> 4
+
+But there is no C edge.
+
+So create:
+
+3 --C--> 7
+
+Now the new edge is:
+
+3 7 C
+
+This path spells:
+
+A T C
+
+So it represents ATC.
+
+Important point:
+
+ATAGA and ATC share the prefix AT
+
+So the trie reuses the nodes for A and T.
+
+4. Insert third pattern: GAT
+
+Now insert:
+
+GAT
+
+Start at root 1.
+
+First letter is G.
+
+There is no G edge from root, so create:
+
+1 --G--> 8
+
+Then A:
+
+8 --A--> 9
+
+Then T:
+
+9 --T--> 10
+
+New edges:
+
+1 8 G
+8 9 A
+9 10 T
+5. Final trie
+
+Visually:
+
+        1
+      /   \
+     A     G
+     |     |
+     2     8
+     |     |
+     T     A
+     |     |
+     3     9
+    / \    |
+   A   C   T
+   |   |
+   4   7
+   |
+   G
+   |
+   5
+   |
+   A
+   |
+   6
+
+Paths:
+
+1 -> 2 -> 3 -> 4 -> 5 -> 6 = ATAGA
+1 -> 2 -> 3 -> 7         = ATC
+1 -> 8 -> 9 -> 10        = GAT
+6. Output format
+
+Each edge is printed as:
+
+parent_node child_node edge_label
+
+So the sample output is:
+
+1 2 A
+2 3 T
+3 4 A
+4 5 G
+5 6 A
+3 7 C
+1 8 G
+8 9 A
+9 10 T
+
+The node numbers do not have to be exactly the same as the sample, as long as the trie structure is correct.
+
+But if you insert strings in input order and create node numbers sequentially, you will usually get the same output.
+
+7. Core idea in Python
+
+You need a structure like this:
+
+trie = {
+    1: {}
+}
+
+This means:
+
+node 1 has no outgoing edges yet
+
+After inserting ATAGA, the trie would conceptually look like:
+
+{
+    1: {'A': 2},
+    2: {'T': 3},
+    3: {'A': 4},
+    4: {'G': 5},
+    5: {'A': 6},
+    6: {}
+}
+
+Meaning:
+
+from node 1, A goes to node 2
+from node 2, T goes to node 3
+from node 3, A goes to node 4
+...
+8. Simple solution
+#!/usr/bin/env python3
+
+from sys import argv
+
+
+def read_patterns(filename):
+    """Read DNA patterns from an input file."""
+    patterns = []
+
+    with open(filename) as f:
+        for line in f:
+            line = line.strip()
+
+            if line == '':
+                continue
+
+            patterns.append(line)
+
+    return patterns
+
+
+def build_trie(patterns):
+    """Build a trie from DNA patterns.
+
+    Parameters:
+        patterns:
+            list of str, DNA strings.
+
+    Returns:
+        A list of edges. Each edge is stored as:
+            parent_node, child_node, symbol
+    """
+    trie = {1: {}}
+    edges = []
+    next_node = 2
+
+    for pattern in patterns:
+        current_node = 1
+
+        for symbol in pattern:
+            if symbol in trie[current_node]:
+                current_node = trie[current_node][symbol]
+
+            else:
+                trie[current_node][symbol] = next_node
+                trie[next_node] = {}
+
+                edges.append((current_node, next_node, symbol))
+
+                current_node = next_node
+                next_node += 1
+
+    return edges
+
+
+def print_edges(edges):
+    """Print trie edges in adjacency-list format."""
+    for parent, child, symbol in edges:
+        print(parent, child, symbol)
+
+
+def main():
+    filename = argv[1]
+
+    patterns = read_patterns(filename)
+    edges = build_trie(patterns)
+    print_edges(edges)
+
+
+if __name__ == '__main__':
+    main()
+
+Run:
+
+python3 trie.py input.txt
