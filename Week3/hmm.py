@@ -16,6 +16,7 @@ Usage: python <script.py> <input_fasta_filename.fasta>
 
 from sys import argv
 import random
+from pathlib import Path
 
 # Background amino acid probabilities
 pa = { 'A':0.074, 'C':0.025, 'D':0.054, 'E':0.054, 'F':0.047, 'G':0.074,
@@ -60,8 +61,11 @@ def match_state_checker(seq_ls):
     length = len(seq_ls[0])
     for seq in seq_ls:
         if length != len(seq):
-            print(f'sequence length should be same')
-            exit()
+            raise ValueError('sequence length should be same')
+
+    if len(seq_ls[0]) == 0:
+        raise ValueError("sequence should not be empty")
+
     #check which column is match
     sequence_length = len(seq_ls[0])
     col_num = len(seq_ls)
@@ -289,9 +293,8 @@ def hmm_sequence_generator(trans_norm_dict, emission_norm_dict):
       from the Begin state, it samples the next state until the End state is
       reached. The odds from previous state to next state is based on
       trans_norm_dict. Each Match states emit residues based on
-      `emission_norm_dict`, while
-      insertion states emit residues based on the background probability `pa`.
-      Deletion emits nothing.
+      `emission_norm_dict`, while insertion states emit residues based
+      on the background probability `pa`. Deletion emits nothing.
 
       Parameters:
            trans_norm_dict: A dictionary where each key is a transition
@@ -363,34 +366,44 @@ def main():
     ####Basic implement
     #filename
     infile = argv[1]
+
     #parsing and info collection
     seq_ls = fasta_reader(infile)
+
     match_state = match_state_checker(seq_ls)
+
     #reduced sequence
     redu_seq_ls = reduced_alignment_maker(seq_ls, match_state)
+
     #core part, transition and emission counts
     transition_counts, emission_counts = transitions_count(seq_ls, match_state)
+
     #calculation
     trans_norm_dict, emission_norm_dict = (
         trans_count_normalize(transition_counts, emission_counts))
+
     #implementation
     hidden_sequence, hmm_residue_sequence = (
         hmm_sequence_generator(trans_norm_dict, emission_norm_dict))
-    #print(hidden_sequence)
+
     print(hmm_residue_sequence)
 
     ###Questions of the assignment
     #Q1
-    if infile == 'test.fasta':
-        with open('reduced_alignment.txt', 'w') as f:
-            for seq in redu_seq_ls:
-                f.write(f'{seq}\n')
+
+    inputfile_path = Path(argv[1])
+
+    output_filename = inputfile_path.with_suffix('.txt')
+    #the reduced alignment is input_filename.txt
+
+    with open(output_filename, 'w') as f:
+        for seq in redu_seq_ls:
+            f.write(f'{seq}')
+            f.write(f'\n')
 
     #Q3
     print(trans_norm_dict)
     print(emission_norm_dict)
-
-
 
 if __name__ == "__main__":
     main()
