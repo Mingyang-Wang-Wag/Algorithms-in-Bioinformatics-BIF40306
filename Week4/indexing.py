@@ -364,7 +364,7 @@ def main():
     query_ls= fasta_reader(query_filename)
 
     genome_kmer_dict = hashtable_maker(seq_ls, k)
-    print(len(genome_kmer_dict))
+    print(f'The number of kmers is:{len(genome_kmer_dict)}')
 
     query_kmer_dict = query_hashtable_maker(query_ls, k)
     kmer_posi_dict= match_table_maker(query_kmer_dict, genome_kmer_dict)
