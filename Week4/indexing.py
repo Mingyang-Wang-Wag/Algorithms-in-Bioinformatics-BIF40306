@@ -310,7 +310,7 @@ def matching_printer(best_hit_dict, seq_ls):
         space = ' ' * (shift - 1)
         print(f'{space}{query}')
         print(f'\n')
-        print(f'{seq_ls[seq_index - 1]}')
+        print(f'{seq_ls[seq_index - 1]}\n')
 
 #another solution, print the matching part before and after + 5
 #also print the relative position
@@ -352,10 +352,8 @@ def main():
 
     hits_dict_short = cluster_hits(kmer_posi_dict_short)
     best_hit_dict_short = best_hit_finder(hits_dict_short)
-    print(f'{best_hit_dict_short}\n')
+    print(f'The best hit:{best_hit_dict_short}\n')
     matching_printer(best_hit_dict_short, seq_ls_short)
-    print(f'\n')
-
 
     # Running for TAIR10 sequence and list of queries
     k = 13
