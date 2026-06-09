@@ -265,8 +265,6 @@ def best_hit_finder(hits_dict):
 
         best_hits.sort()
 
-
-
         best_hit_dict[query] = {
             "seq_index": best_seq,
             "shift": best_shift,
